@@ -1,0 +1,17 @@
+# Environnement Python
+.venv/
+__pycache__/
+*.pyc
+
+# Variables d'environnement (NE PAS COMMIT)
+.env
+
+# Fichiers générés
+output/
+*.svg
+*.png
+
+# IDE
+.idea/
+.vscode/
+*.swp
