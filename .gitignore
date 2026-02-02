@@ -7,9 +7,11 @@ __pycache__/
 .env
 
 # Fichiers générés
-output/
+outputs/
 
 # IDE
 .idea/
 .vscode/
 *.swp
+
+nodes_modules/
