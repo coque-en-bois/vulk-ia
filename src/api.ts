@@ -4,11 +4,19 @@ import {
   InputImage,
   ProgressEvent,
 } from "./types";
+import { getAuthToken } from "./components/AuthGate/AuthGate";
 
 const API_BASE = "/api";
 
+function authHeaders(): Record<string, string> {
+  const token = getAuthToken();
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
 export async function fetchInputImages(): Promise<InputImage[]> {
-  const res = await fetch(`${API_BASE}/inputs`);
+  const res = await fetch(`${API_BASE}/inputs`, {
+    headers: authHeaders(),
+  });
   if (!res.ok)
     throw new Error("Impossible de charger les images d'inspiration");
   return res.json();
@@ -29,6 +37,7 @@ export async function submitGeneration(
 
   const res = await fetch(`${API_BASE}/generate`, {
     method: "POST",
+    headers: authHeaders(),
     body: formData,
   });
 
