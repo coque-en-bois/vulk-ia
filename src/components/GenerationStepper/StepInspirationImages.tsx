@@ -1,15 +1,15 @@
 import styles from "./steps.module.css";
 
 const images = [
-  { filename: "1.png", url: "/images/1.png" },
-  { filename: "2.png", url: "/images/2.png" },
-  { filename: "3.png", url: "/images/3.png" },
-  { filename: "4.png", url: "/images/4.png" },
-  { filename: "5.png", url: "/images/5.png" },
-  { filename: "6.png", url: "/images/6.png" },
-  { filename: "7.png", url: "/images/7.png" },
-  { filename: "8.png", url: "/images/8.png" },
-  { filename: "9.png", url: "/images/9.png" },
+  { filename: "1.png", url: "./images/1.png" },
+  { filename: "2.png", url: "./images/2.png" },
+  { filename: "3.png", url: "./images/3.png" },
+  { filename: "4.png", url: "./images/4.png" },
+  { filename: "5.png", url: "./images/5.png" },
+  { filename: "6.png", url: "./images/6.png" },
+  { filename: "7.png", url: "./images/7.png" },
+  { filename: "8.png", url: "./images/8.png" },
+  { filename: "9.png", url: "./images/9.png" },
 ];
 
 interface Props {

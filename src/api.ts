@@ -6,7 +6,11 @@ import {
 } from "./types";
 import { getAuthToken } from "./components/AuthGate/AuthGate";
 
-const API_BASE = "/api";
+const API_BASE = import.meta.env.VITE_BACKEND_API;
+
+if (!API_BASE) {
+  throw new Error("VITE_BACKEND_API environment variable is not set");
+}
 
 function authHeaders(): Record<string, string> {
   const token = getAuthToken();
