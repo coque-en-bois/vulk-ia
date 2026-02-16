@@ -16,7 +16,7 @@ const CONFIG = {
   // Nombre de propositions à générer par vue
   propositionsCount: 3,
   // Types de vues à générer
-  views: ["flat", "3/4"],
+  views: ["flat", "3_4"],
   // Résolution et format
   aspectRatio: "1:1",
   resolution: "2K",
@@ -53,7 +53,7 @@ function buildPrompt(baseDescription, view, propositionIndex) {
       - Aucune perspective, aucun angle, parfaitement orthogonale
       - Montre tous les détails de la gravure clairement visibles
     `,
-    "3/4": `
+    "3_4": `
       IMPORTANT: Génère une vue en PERSPECTIVE 3/4 (vue isométrique élégante).
       - La médaille doit être inclinée avec un angle de 30-45 degrés
       - Montre l'épaisseur et le volume de la médaille en bois
@@ -106,7 +106,7 @@ async function generateImage(ai, prompt, exampleImages) {
 }
 
 // Sauvegarder les résultats
-function saveResults(response, view, propositionIndex, outputDir) {
+function saveResults(response, view, propositionIndex, outputDir, productType) {
   const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
   const savedFiles = [];
 
@@ -116,7 +116,7 @@ function saveResults(response, view, propositionIndex, outputDir) {
     } else if (part.inlineData) {
       const imageData = part.inlineData.data;
       const buffer = Buffer.from(imageData, "base64");
-      const filename = `medaille_${view}_prop${propositionIndex + 1}_${timestamp}.png`;
+      const filename = `${productType}_${view}_prop${propositionIndex + 1}_${timestamp}.png`;
       const filepath = path.join(outputDir, filename);
       fs.writeFileSync(filepath, buffer);
       savedFiles.push(filename);
@@ -147,28 +147,69 @@ async function main() {
     apiKey: process.env.GEMINI_API_KEY,
   });
 
-  // Demander la description au client
+  // Demander les informations au client
   console.log(
     "\n🎨 ═══════════════════════════════════════════════════════════",
   );
-  console.log("   VULK-IA - Générateur de maquettes de médailles en bois");
+  console.log("   VULK-IA - Générateur de maquettes en bois");
   console.log(
     "═══════════════════════════════════════════════════════════════\n",
   );
 
-  console.log("📝 Décrivez la médaille que vous souhaitez créer.");
-  console.log(
-    "   Incluez: le type d'événement, le style souhaité, les motifs,",
-  );
-  console.log("   le type de bois, et toute autre spécification.\n");
+  // Question 1: Nom de l'événement
+  const eventName = await askQuestion("🏆 Nom de l'événement sportif: ");
 
-  console.log("💡 Exemple de description complète:");
+  if (!eventName.trim()) {
+    console.log("\n❌ Aucun nom d'événement fourni. Abandon.");
+    process.exit(1);
+  }
+
+  // Créer un slug pour le dossier (sans accents ni caractères spéciaux)
+  const eventSlug = eventName
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+
+  // Question 2: Type de produit
+  console.log("\n📦 Quel type de produit souhaitez-vous générer?");
+  console.log("   1. Médaille");
+  console.log("   2. Trophée");
+  const productChoice = await askQuestion("\n🔢 Votre choix (1 ou 2): ");
+
+  const productType = productChoice.trim() === "2" ? "trophee" : "medaille";
+  const productLabel = productType === "trophee" ? "trophée" : "médaille";
+
+  console.log(`\n✅ Génération de ${productLabel}s pour: ${eventName}\n`);
+
+  // Question 3: Description du design
+  console.log(`📝 Décrivez le design de la ${productLabel} souhaitée.`);
+  console.log(
+    "   Incluez: le style, les motifs, le type de bois, les textes à graver...",
+  );
+
+  console.log("\n💡 Exemple de description complète:");
   console.log("   ─────────────────────────────────────────────────────────");
-  console.log('   "Médaille pour un trail de montagne de 42km en Auvergne.');
-  console.log("   Style moderne et épuré en bois de chêne. Forme hexagonale");
-  console.log("   avec gravure d'un volcan stylisé (Puy de Dôme) et des");
-  console.log("   silhouettes de coureurs. Intégrer le texte 'VULCANO TRAIL'");
-  console.log('   et la distance 42KM. Finition satinée."');
+  if (productType === "medaille") {
+    console.log(
+      '   "Style moderne et épuré en bois de chêne. Forme hexagonale',
+    );
+    console.log("   avec gravure d'un volcan stylisé et des silhouettes de");
+    console.log(
+      "   coureurs. Intégrer le nom de l'événement et la distance.\"",
+    );
+  } else {
+    console.log(
+      '   "Trophée élégant en bois de noyer avec socle rectangulaire.',
+    );
+    console.log(
+      "   Forme verticale avec découpe laser représentant un coureur",
+    );
+    console.log(
+      "   franchissant la ligne d'arrivée. Plaque gravée pour le nom.\"",
+    );
+  }
   console.log("   ─────────────────────────────────────────────────────────\n");
 
   const baseDescription = await askQuestion("🖊️  Votre description: ");
@@ -179,14 +220,17 @@ async function main() {
   }
 
   // Enrichir automatiquement le prompt avec le contexte métier
-  const enrichedDescription = `À partir de ces exemples de médailles en bois, crée un design unique: ${baseDescription}. 
-Mets en valeur la texture naturelle du bois. Le design doit rester fonctionnel et esthétique pour une médaille de sport.`;
+  const enrichedDescription = `À partir de ces exemples de ${productLabel}s en bois, crée un design unique pour l'événement "${eventName}": ${baseDescription}. 
+Mets en valeur la texture naturelle du bois. Le design doit rester fonctionnel et esthétique.`;
+
+  // Définir le dossier de sortie pour cet événement
+  const eventOutputDir = path.join(CONFIG.outputDir, eventSlug);
 
   console.log("\n✨ Description enrichie et prête pour la génération!\n");
 
   // Créer le dossier de sortie s'il n'existe pas
-  if (!fs.existsSync(CONFIG.outputDir)) {
-    fs.mkdirSync(CONFIG.outputDir, { recursive: true });
+  if (!fs.existsSync(eventOutputDir)) {
+    fs.mkdirSync(eventOutputDir, { recursive: true });
   }
 
   // Charger les images d'exemple
@@ -217,7 +261,13 @@ Mets en valeur la texture naturelle du bois. Le design doit rester fonctionnel e
 
       try {
         const response = await generateImage(ai, prompt, exampleImages);
-        const savedFiles = saveResults(response, view, i, CONFIG.outputDir);
+        const savedFiles = saveResults(
+          response,
+          view,
+          i,
+          eventOutputDir,
+          productType,
+        );
         allResults.push({ view, proposition: i + 1, files: savedFiles });
       } catch (error) {
         console.error(`  ❌ Erreur: ${error.message}`);
@@ -236,7 +286,7 @@ Mets en valeur la texture naturelle du bois. Le design doit rester fonctionnel e
 
   // Résumé final
   console.log("\n\n🏆 === GÉNÉRATION TERMINÉE ===");
-  console.log(`📁 Dossier de sortie: ${CONFIG.outputDir}`);
+  console.log(`📁 Dossier de sortie: ${eventOutputDir}`);
   console.log(`📊 Résumé:`);
   for (const view of CONFIG.views) {
     const count = allResults.filter((r) => r.view === view).length;
@@ -244,7 +294,7 @@ Mets en valeur la texture naturelle du bois. Le design doit rester fonctionnel e
   }
   console.log(`\n🎉 Total: ${allResults.length} images générées!`);
 
-  exit(0);
+  process.exit(0);
 }
 
 main();

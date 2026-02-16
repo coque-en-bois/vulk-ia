@@ -7,7 +7,7 @@ __pycache__/
 .env
 
 # Fichiers générés
-outputs/
+/outputs/
 
 # IDE
 .idea/
@@ -15,3 +15,5 @@ outputs/
 *.swp
 
 node_modules/
+
+apps/backend/dist
