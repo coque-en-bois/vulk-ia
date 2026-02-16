@@ -10,7 +10,7 @@ on:
     workflow_dispatch:
 
 env:
-    VITE_BACKEND_APIL: ${{ vars.VITE_BACKEND_APIL }}
+    VITE_BACKEND_API: ${{ vars.VITE_BACKEND_API }}
 
 jobs:
     deployment:
