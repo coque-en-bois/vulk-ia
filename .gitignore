@@ -15,5 +15,4 @@ __pycache__/
 *.swp
 
 node_modules/
-
-apps/backend/dist
+dist/
