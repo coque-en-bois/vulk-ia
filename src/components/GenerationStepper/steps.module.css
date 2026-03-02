@@ -198,6 +198,73 @@
   color: var(--color-error);
 }
 
+/* Prompt builder sections */
+.promptSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.chipGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+}
+
+.chip {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 0.85rem;
+  background: var(--color-bg);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.85rem;
+  color: var(--color-text);
+  text-align: left;
+}
+
+.chip:hover {
+  border-color: var(--color-text-muted);
+  transform: translateY(-1px);
+}
+
+.chipSelected {
+  border-color: var(--color-primary) !important;
+  background: rgba(245, 158, 11, 0.08);
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.15);
+}
+
+.chipIcon {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.chipLabel {
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+/* Prompt preview */
+.promptPreview {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.promptPreviewText {
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 0.85rem 1rem;
+  font-size: 0.9rem;
+  color: var(--color-text);
+  line-height: 1.6;
+  font-style: italic;
+}
+
 /* Tip box */
 .tipBox {
   background: rgba(245, 158, 11, 0.06);
